@@ -9,6 +9,7 @@ import "hash/crc32"
 import "fmt"
 import "github.com/gerow/go-color"
 import "math"
+import "strings"
 
 func resetColors() {
 	os.Stdout.WriteString("\033]11;0\007")
@@ -28,10 +29,23 @@ func hostColor(name string) (uint8, uint8, uint8) {
 	return r, g, b
 }
 
-func main() {
-	host := os.Args[1]
+func extractHostname(args []string) string {
+	for _,e := range args {
+		if strings.Contains(e, "@") {
+			e = strings.Split(e, "@")[1]
+		}
+		if strings.Contains(e, ".") {
+			return e;
+		}
+	}
+	log.Printf("failed to find hostname in args %v\n", args)
+	return ""
+}
 
-	cmd := exec.Command("ssh", host)
+func main() {
+	host := extractHostname(os.Args)
+
+	cmd := exec.Command("ssh", os.Args[1:]...)
 
 	r, g, b := hostColor(host)
 
